@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.netease.engine.mapper.AppProjectInfoMapper">
+	
+	<insert id="save" parameterType="com.netease.engine.model.AppProjectInfo">
+		insert into spider_project_info (name,status,create_time,create_user,push_type,push_path,secret_key,secret_name) 
+		values (#{name},#{status},#{create_time},#{create_user},#{push_type},#{push_path},#{secret_key},#{secret_name})
+	</insert>
+</mapper>

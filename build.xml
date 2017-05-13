@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="solrauto" default="" basedir=".">
+	<!-- Java源文件目录 -->
+	<property name="src" value="src/main/java" />
+	<!-- 测试用的Java源文件目录 -->
+	<property name="test-src" value="src/test/java" />
+	<!--编译输出的根目录 -->
+
+	<!--单元测试结果存放的目录 -->
+	<property name="test-result" value="target/test-result" />
+	<!--资源目录（目录内容将在编译的时候自动复制到classpath） -->
+	<property name="main-resources" value="src/main/resources" />
+	<!-- 项目发布的根目录 -->
+	<property name="dist" value="target/spider" />
+	<!--类库jar文件的根目录 -->
+	<property name="lib" value="${dist}/WEB-INF/lib" />
+	<!--编译输出的类文件根目录以及资源文件复制的目标目录 -->
+	<property name="classes" value="${dist}/WEB-INF/classes" />
+	<!-- 把系统的环境变量都变成加env.前缀可以访问 -->
+	<property environment="env" />
+
+	<!-- Web应用程序运行时需要的jar包 -->
+	<fileset id="runtimeLibraryFiles" dir="${lib}">
+		<include name="**/*.jar" />
+	</fileset>
+
+	<!-- 运行应用程序的classpath路径 -->
+	<path id="classpath">
+		<pathelement path="${classes}" />
+		<fileset refid="runtimeLibraryFiles" />
+	</path>
+
+	
+
+	<!-- 通过ant运行独立的应用程序 -->
+	<target name="run-app">
+		<fail unless="app-class"
+			message="必须指定要运行的类名 -Dapp-class=com.netease.xxx.xxx -Dapp-arg=xxx " />
+		<java classname="${app-class}" fork="true" maxmemory="512m">
+			<sysproperty key="disable-pool" value="true" />
+			<arg line="${app-arg}" />
+			<classpath refid="classpath" />
+		</java>
+	</target>
+</project>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.netease.engine.mapper.IndexInfoMapper">
+
+	<resultMap id="BaseResultMap" type="com.netease.engine.model.IndexInfo">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="index" property="index" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<select id="selectIndex" parameterType="String" resultType="Long">
+		select `index` from spider_index_info
+		where id = #{id}
+	</select>
+	
+	<update id="updateIndex" parameterType="com.netease.engine.model.IndexInfo">
+		update spider_index_info 
+		set `index` = #{index}
+		where id = #{id}
+	</update>
+	
+	<update id="updateIndexInfo" parameterType="com.netease.engine.model.IndexInfo">
+		update spider_index_info set `index` = #{index} where id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"  
+    xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"  
+    xmlns:aop="http://www.springframework.org/schema/aop"  
+    xsi:schemaLocation="  
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">  
+  
+	<bean id="timerTask" class="com.netease.engine.task.TimerTask">
+	</bean>          
+    
+    <!-- 重新抓取微信公众号 -->
+    <bean id="graspWeixinBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="timerTask"/>
+        </property>
+        <property name="targetMethod">
+            <value>grasp_weixin</value>
+        </property>
+    </bean>   
+    
+    <bean id="graspWeixinTask" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <ref bean="graspWeixinBean"/>
+        </property>
+        <property name="cronExpression">
+            <value>0 30 10 * * ?</value>
+        </property>
+    </bean>
+    
+     <bean id="pushSourceidBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="timerTask"/>
+        </property>
+        <property name="targetMethod">
+            <value>push_sourceid</value>
+        </property>
+    </bean>
+    
+    <bean id="pushSourceidTask" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <ref bean="pushSourceidBean"/>
+        </property>
+        <property name="cronExpression">
+            <value>0 30 8 * * ?</value>
+        </property>
+    </bean>
+    
+    <!-- 清理content去重队列 -->
+    <bean id="cleanContentQueueBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="cleanContentQueue"/>
+        </property>
+        <property name="targetMethod">
+            <value>run</value>
+        </property>
+    </bean>   
+    
+    <bean id="cleanContentQueueTask" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <ref bean="cleanContentQueueBean"/>
+        </property>
+        <property name="cronExpression">
+            <value>0 0 0 * * ?</value>
+        </property>
+    </bean>
+    
+    <bean id="startQuertz" lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="autoStartup" value="true" />
+        <property name="triggers">
+            <list>
+<!-- 				<ref bean="graspWeixinTask"/> -->
+				<ref bean="cleanContentQueueTask"/>
+				<ref bean="pushSourceidTask"/>
+            </list>
+        </property>
+    </bean>
+</beans>  

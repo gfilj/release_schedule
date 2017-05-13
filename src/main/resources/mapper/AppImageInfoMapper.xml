@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.netease.engine.mapper.AppImageInfoMapper">
+	
+	<!-- 数据库中表统一名称：由app 改为 spider_image_info -->
+	
+	<insert id="save" parameterType="com.netease.engine.model.AppImageInfo">
+		insert into spider_image_info (url,fingerprintId,storeId,create_time) 
+		values (#{url},#{fingerprintId},#{storeId},#{create_time})
+	</insert>
+</mapper>

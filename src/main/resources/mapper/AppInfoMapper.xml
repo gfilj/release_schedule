@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.netease.engine.mapper.AppInfoMapper">
+	
+	<!-- 数据库中表统一名称：由app 改为 spider_app_info -->
+	
+	<insert id="save" parameterType="com.netease.engine.model.AppInfo">
+		insert into spider_app_info (name,create_time,status,create_user) 
+		values (#{name},#{create_time},#{status},#{create_user})
+	</insert>
+</mapper>
