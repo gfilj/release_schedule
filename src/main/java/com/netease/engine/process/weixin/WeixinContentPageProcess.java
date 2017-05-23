@@ -1,13 +1,16 @@
 package com.netease.engine.process.weixin;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.netease.engine.model.ContentInfo;
 import com.netease.engine.service.RedisService;
+
 import us.codecraft.webmagic.Page;
 
 /**
@@ -26,6 +29,7 @@ public class WeixinContentPageProcess extends AbstractProcess {
 
 	@Override
 	public void process(Page page) {
+		Pattern varctPattern=Pattern.compile("var ct = \"([\\s\\S]*?)\"");
 		try{
 			String is_error = page.getHtml().regex("(<div[^>]*\\s+style=['\"]global_error_msg warn['\"]>*\\s+操作过于频繁，请稍后再试。*\\s+</div>)").toString();
 			if(is_error!=null){
@@ -39,13 +43,16 @@ public class WeixinContentPageProcess extends AbstractProcess {
 			post_name = Matcher.quoteReplacement(post_name);
 			String content = page.getHtml().xpath("//div[@id='js_content']").toString();//文章内容
 			content = Matcher.quoteReplacement(content);
-			String pub_time = page.getHtml().xpath("//em[@id='post-date']/text()").toString();//发布时间
 			ContentInfo contentInfo = new ContentInfo();
+			
+			Matcher varctMatcher=varctPattern.matcher(page.getRawText());
+			if(varctMatcher.find()){
+				contentInfo.setTime(varctMatcher.group(1));
+			}
 			contentInfo.setTitle(title);
 			contentInfo.setContent(content);
 			contentInfo.setOrigin(post_name);
 			contentInfo.setUrl(page.getUrl().toString());
-			contentInfo.setTime(pub_time);
 			page.putField("content_info", contentInfo);	
 			page.putField("priority", page.getRequest().getPriority());
 			page.putField("url", page.getRequest().getUrl());

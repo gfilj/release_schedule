@@ -4,12 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+
 import com.alibaba.fastjson.JSON;
 import com.netease.cloud.services.nos.transfer.model.UploadResult;
 import com.netease.engine.mapper.AppImageInfoMapper;
@@ -64,8 +67,9 @@ public class NosUploadTask implements Runnable{
 
 	@Override
 	public void run() {
-    	Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			NosContent nosContent = null;
             String key = null;
             
@@ -115,7 +119,7 @@ public class NosUploadTask implements Runnable{
     			appRecordInfo.setStoreid(storeid);
     			appRecordInfo.setType(1);
     			appRecordInfo.setUrl(url);
-    			appRecordInfo.setCreate_time(new Date());
+    			appRecordInfo.setCreate_time(new Date(Long.parseLong(info.getTime())*1000));
     			appRecordInfo.setUpdate_time(new Date());
     			appRecordInfoMapper.save(appRecordInfo);
             }

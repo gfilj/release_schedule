@@ -1,10 +1,14 @@
 package com.netease.engine.schedule;
 
 import com.alibaba.fastjson.JSON;
+import com.netease.engine.zookeeper.Curator;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import us.codecraft.webmagic.Request;
@@ -34,11 +38,15 @@ public class RedisPriorityScheduler extends DefaultRedisScheduler {
 	@Autowired
 	@Qualifier("jedisPool")
 	private JedisPool pool;	
+	@Autowired
+	@Qualifier("curator")
+	private Curator curator;
 	
 	@Override
 	protected void pushWhenNoDuplicate(Request request, Task task) {
-		Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis=pool.getResource();
 			String value = JSON.toJSONString(request);
 			if (request.getPriority() > 0)
 				jedis.zadd(getZsetPlusPriorityKey(task), request.getPriority(), value);
@@ -46,6 +54,8 @@ public class RedisPriorityScheduler extends DefaultRedisScheduler {
 				jedis.zadd(getZsetMinusPriorityKey(task), request.getPriority(), value);
 			else
 				jedis.lpush(getQueueNoPriorityKey(task), value);
+		}catch(Exception e){
+			log.info("\n\n ***************unable to get the redis ***************\n\n",e);
 		} finally {
 			pool.returnResource(jedis);
 		}
@@ -53,33 +63,49 @@ public class RedisPriorityScheduler extends DefaultRedisScheduler {
 
 	@Override
 	public synchronized Request poll(Task task) {
-		Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis=pool.getResource();
 			String value = getRequest(jedis, task);
 			if (StringUtils.isBlank(value))
 				return null;
 			return JSON.parseObject(value, Request.class);
+		}catch(Exception e){
+			log.info("\n\n ***************unable to get the redis ***************\n\n",e);
+			return null;
 		} finally {
 			pool.returnResource(jedis);
 		}
 	}
 
 	private String getRequest(Jedis jedis, Task task) {
-		String value;
-		Set<String> values = jedis.zrevrange(getZsetPlusPriorityKey(task), 0, -1);
-		if (values.isEmpty()) {
-			value = jedis.lpop(getQueueNoPriorityKey(task));
-			if (StringUtils.isBlank(value)) {
-				values = jedis.zrevrange(getZsetMinusPriorityKey(task), 0, -1);
-				if (!values.isEmpty()) {
-					value = values.toArray(new String[0])[0];
-					jedis.zrem(getZsetMinusPriorityKey(task), value);
-				}
-			}
-		} else {
-			value = values.toArray(new String[0])[0];
-			jedis.zrem(getZsetPlusPriorityKey(task), value);
-		}
+		InterProcessMutex lock = curator.getLock(getClass().getSimpleName() + "/lock", 1);
+        if (lock == null) {
+        	log.info("\n\n ***************unable to get the lock ***************\n\n");
+            return null;
+        }
+        String value;
+        try{
+    		Set<String> values = jedis.zrevrange(getZsetPlusPriorityKey(task), 0, -1);
+    		if (values.isEmpty()) {
+    			value = jedis.lpop(getQueueNoPriorityKey(task));
+    			if (StringUtils.isBlank(value)) {
+    				values = jedis.zrevrange(getZsetMinusPriorityKey(task), 0, -1);
+    				if (!values.isEmpty()) {
+    					value = values.toArray(new String[0])[0];
+    					jedis.zrem(getZsetMinusPriorityKey(task), value);
+    				}
+    			}
+    		} else {
+    			value = values.toArray(new String[0])[0];
+    			jedis.zrem(getZsetPlusPriorityKey(task), value);
+    		}
+        }catch(Exception e){
+        	log.info("\n\n ***************unable to get the getRequest redis ***************\n\n",e);
+        	return null;
+        }finally{
+        	curator.releaseLock(lock);
+        }
 		return value;
 	}
 

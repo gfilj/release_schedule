@@ -175,7 +175,7 @@ public class HttpClientDownloader extends AbstractDownloader {
 			int size = site.getUserAgent().size();
 		    String ua = site.getUserAgent().get((int)(Math.random())*size);
 			try {
-				proxyIpInfo = proxyIpService.getNext("sogou",DataType.NE_DATA5U);
+				proxyIpInfo = proxyIpService.getNext("sogou",DataType.NE_VPS1);
 			} catch (TException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -208,17 +208,17 @@ public class HttpClientDownloader extends AbstractDownloader {
 		            httpGet.setHeader(headerKey, headerValue);
 				}
 			
-				if(Constant.WEIXIN_SEARCH.equals(request.getExtra("taskName"))){
-					cookie = getCookie();
-					while(cookie==null) {
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						cookie = getCookie();
-					}
-				}
+//				if(Constant.WEIXIN_SEARCH.equals(request.getExtra("taskName"))){
+//					cookie = getCookie();
+//					while(cookie==null) {
+//						try {
+//							Thread.sleep(5000);
+//						} catch (InterruptedException e) {
+//							e.printStackTrace();
+//						}
+//						cookie = getCookie();
+//					}
+//				}
 				
 				request.putExtra("cookie", cookie);
 				httpClient = HttpClientBuilder.create().setProxy(new HttpHost(proxyIpInfo.getIp(),proxyIpInfo.getPort())).setRetryHandler(new DefaultHttpRequestRetryHandler(1, true)).build();

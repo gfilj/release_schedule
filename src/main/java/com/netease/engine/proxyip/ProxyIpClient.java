@@ -29,8 +29,9 @@ public class ProxyIpClient {
     public ProxyIpInfo getPrivateProxyIpInfo(String key, boolean isPrivate) {
         String seqKey = isPrivate ? Constant.KEY_IP_POOL_CONSUMER_PRIVATE_PREFIX : Constant.KEY_IP_POOL_CONSUMER_PREFIX + key;
         String poolKey = isPrivate ? Constant.KEY_IP_POOL_PRIVATE_CHECKED : Constant.KEY_IP_POOL_CHECKED;
-        Jedis jedis = getJedis();
+        Jedis jedis = null;
         try {
+        	jedis = getJedis();
             Long i = jedis.incr(seqKey);
             String str = jedis.lindex(poolKey, i - 1);
             if (str == null && i > jedis.llen(poolKey)) {

@@ -37,9 +37,10 @@ public class CleanContentQueueTask {
 	}
 
 	public void run(){
-		Jedis jedis = pool.getResource();
 		boolean flag = true;
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			while(flag){
 				Set<String> cleanKey = jedis.zrange(WeixinContentRedisSchedulerProcess.CLEAN_CONTENT_QUEUE, 0, 0);
 				if(cleanKey != null && !cleanKey.isEmpty()){

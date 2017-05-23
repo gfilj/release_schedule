@@ -72,12 +72,16 @@ public class DefaultRedisScheduler extends DuplicateRemovedScheduler implements
         	log.info("\n\n ***************unable to get the lock ***************\n\n");
             return null;
         }
-		Jedis jedis = pool.getResource();
+        Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			String value = getRequest(jedis, task);
 			if (StringUtils.isBlank(value))
 				return null;
 			return JSON.parseObject(value, Request.class);
+		} catch(Exception e){
+			log.info("\n\n ***************unable to get the redis ***************\n\n");
+			return null;
 		} finally {
 			pool.returnResource(jedis);
 			curator.releaseLock(lock);
@@ -106,8 +110,9 @@ public class DefaultRedisScheduler extends DuplicateRemovedScheduler implements
 	
 	@Override
 	public int getLeftRequestsCount(Task task) {
-		Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			Long plus_size = jedis.scard(RedisPriorityScheduler.getZsetPlusPriorityKey(task));
 			Long minus_size = jedis.scard(RedisPriorityScheduler.getZsetMinusPriorityKey(task));
 			Long zore_siez = jedis.llen(RedisPriorityScheduler.getQueueNoPriorityKey(task));
@@ -119,8 +124,9 @@ public class DefaultRedisScheduler extends DuplicateRemovedScheduler implements
 
 	@Override
 	public int getTotalRequestsCount(Task task) {
-		Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			Long plus_size = jedis.scard(RedisPriorityScheduler.getZsetPlusPriorityKey(task));
 			Long minus_size = jedis.scard(RedisPriorityScheduler.getZsetMinusPriorityKey(task));
 			Long zore_siez = jedis.llen(RedisPriorityScheduler.getQueueNoPriorityKey(task));

@@ -34,8 +34,9 @@ public class WeixinContentRedisSchedulerProcess extends RedisPriorityScheduler {
 	
 	@Override
 	public boolean isDuplicate(Request request, Task task) {
-		Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			/*if(request.isWhether_deposited())
 				return false;*/
 			String modifykey = MD5Util.calcMD5(request.getSourceid() + "_" + request.getTitle());

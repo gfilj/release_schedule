@@ -19,12 +19,13 @@ import us.codecraft.webmagic.selector.Html;
 @Component("weixinSearchPageProcess")
 public class WeixinSearchPageProcess extends AbstractProcess {
 
-	private static final String SEARCH_REGEX_PRE = "<a target=\"_blank\" uigs=\"main_toweixin_account_image_0\" href=\"([\\s\\S]*?)\">[\\s\\S]*?";
+	private static final String SEARCH_REGEX_PRE = "<a target=\"_blank\" uigs=\"account_name_0\" href=\"([\\s\\S]*?)\">[\\s\\S]*?";
 	private static final String SEARCH_REGEX_END = "</label>";
 	
 	@Override
 	public void process(Page page) {
 		try {
+			log.info("weixinSearchPageProcess process");
 			page.getResultItems().setSkip(true);
 			String sourceid = page.getRequest().getSourceid();
 			Html html = page.getHtml();

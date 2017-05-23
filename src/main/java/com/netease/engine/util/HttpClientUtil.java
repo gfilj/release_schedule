@@ -103,4 +103,9 @@ public class HttpClientUtil {
 		}
 	}
 	
+	public static void main(String[] args) throws Exception {
+		
+		System.out.println(HttpClientUtil.getInstance().sendHttpGet("http://localhost:8079/getTask/2", "utf-8"));
+	}
+	
 }

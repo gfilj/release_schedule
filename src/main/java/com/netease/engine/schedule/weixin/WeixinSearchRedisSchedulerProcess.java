@@ -30,8 +30,9 @@ public class WeixinSearchRedisSchedulerProcess extends RedisPriorityScheduler {
 	
 	@Override
 	public boolean isDuplicate(Request request, Task task) {
-		Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			if (request.getPriority() > 0){
 				Set<String> values = jedis.zrevrange(getZsetPlusPriorityKey(task), 0, -1);
 				if(values.contains(JSON.toJSONString(request)))

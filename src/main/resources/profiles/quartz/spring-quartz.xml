@@ -26,7 +26,7 @@
             <ref bean="graspWeixinBean"/>
         </property>
         <property name="cronExpression">
-            <value>0 30 10 * * ?</value>
+            <value>0 30 6,9,12,15,18,21,23 * * ?</value>
         </property>
     </bean>
     
@@ -71,9 +71,9 @@
         <property name="autoStartup" value="true" />
         <property name="triggers">
             <list>
-<!-- 				<ref bean="graspWeixinTask"/> -->
-				<ref bean="cleanContentQueueTask"/>
-				<ref bean="pushSourceidTask"/>
+			<ref bean="graspWeixinTask"/> 
+				<!-- <ref bean="cleanContentQueueTask"/>
+				<ref bean="pushSourceidTask"/> -->
             </list>
         </property>
     </bean>

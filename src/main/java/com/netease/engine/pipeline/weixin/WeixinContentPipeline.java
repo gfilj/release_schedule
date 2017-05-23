@@ -59,8 +59,9 @@ public class WeixinContentPipeline implements Pipeline {
 		try {
 			if(resultItems.get("priority") == null)
 				return;
-			Jedis jedis = pool.getResource();
+			Jedis jedis = null;
 			try {
+				jedis = pool.getResource();
 				ContentInfo info = (ContentInfo) resultItems.get("content_info");
 				String content = info.getContent();
 				

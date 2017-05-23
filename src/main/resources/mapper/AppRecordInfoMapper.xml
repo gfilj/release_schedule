@@ -5,20 +5,20 @@
 	<!-- 数据库中表统一名称：由app_record 改为 spider_record_info -->
 	
 	<select id="findByStatus" resultType="com.netease.engine.model.AppRecordInfo" parameterType="int">
-		select * from spider_record_info where status = #{value}
+		select * from spider_record_info_test_1 where status = #{value}
 	</select>
 	<select id="findByModifykey" resultType="com.netease.engine.model.AppRecordInfo" parameterType="String">
-		select * from spider_record_info where modifykey = #{value}
+		select * from spider_record_info_test_1 where modifykey = #{value}
 	</select>
 	<select id="findByModifykeyAndType" resultType="com.netease.engine.model.AppRecordInfo" parameterType="com.netease.engine.model.AppRecordInfo">
-		select * from spider_record_info where modifykey = #{modifykey} and type = #{type}
+		select * from spider_record_info_test_1 where modifykey = #{modifykey} and type = #{type}
 	</select>
 	<insert id="save" parameterType="com.netease.engine.model.AppRecordInfo">
-		insert into spider_record_info (appid,sourceid,title,url,type,storeid,create_time,update_time,modifykey,status) 
+		insert into spider_record_info_test_1 (appid,sourceid,title,url,type,storeid,create_time,update_time,modifykey,status) 
 		values (#{appid},#{sourceid},#{title},#{url},#{type},#{storeid},#{create_time},#{update_time},#{modifykey},#{status})
 	</insert>
 	<update id="updateByModifykeyAndType" parameterType="com.netease.engine.model.AppRecordInfo">
-		update spider_record_info set update_time=#{update_time},storeid=#{storeid} 
+		update spider_record_info_test_1 set update_time=#{update_time},storeid=#{storeid} 
 		where modifykey=#{modifykey} and type = #{type}
 	</update>	
 </mapper>

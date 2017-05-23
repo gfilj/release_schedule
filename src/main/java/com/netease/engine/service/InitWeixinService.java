@@ -77,8 +77,9 @@ public class InitWeixinService {
 	
 	//向公众号队列添加内容
 	public void pushweixinsource(String sourceid,String appid,String priority){
-		Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {	
+			jedis = pool.getResource();
 			HashMap<String, String> map = new HashMap<String, String>();
 			map.put("sourceid",sourceid);
 			map.put("appid", appid);
@@ -108,9 +109,10 @@ public class InitWeixinService {
 	
 	//获取sourcid
 	public String getsourceid(){
-		Jedis jedis = pool.getResource();
 		String json = null;
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			json = jedis.rpop(Constant.WEIXIN_SOURCE);
 		} finally {
 			pool.returnResource(jedis);
