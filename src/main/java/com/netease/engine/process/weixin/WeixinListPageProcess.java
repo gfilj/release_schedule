@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
+import org.apache.commons.httpclient.HttpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.netease.engine.service.RedisService;
 import com.netease.engine.util.Constant;
 import com.netease.engine.util.DateUtil;
+import com.netease.engine.util.HttpClientFactory;
 
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
@@ -25,7 +27,7 @@ import us.codecraft.webmagic.Request;
  */
 @Component("weixinListPageProcess")
 public class WeixinListPageProcess extends AbstractProcess {
-	private static final String HTTPHEAD = "http://mp.weixin.qq.com";
+	private static final String HTTPHEAD = "https://mp.weixin.qq.com";
 	private static final String CONTENTLIST = "var\\s+msgList\\s+=\\s+\\{(.*?)\\};";
 	
 	@Autowired
@@ -43,54 +45,51 @@ public class WeixinListPageProcess extends AbstractProcess {
 				if(list != null && !list.isEmpty()){
 					JSONObject obj = list.getJSONObject(0);
 					JSONObject cmi = obj.getJSONObject("comm_msg_info");
+					String time = cmi.getString("datetime");
 					String today = DateUtil.formatTime(cmi.getString("datetime"),"yyyy-MM-dd");
 					String nowDay = DateUtil.formatDate(new Date(), "yyyy-MM-dd");
 					if(nowDay.equals(today)){
 						JSONObject amei = obj.getJSONObject("app_msg_ext_info");
 						String contentUrl = amei.get("content_url").toString();
 						String title = amei.get("title").toString();
-						page.addTargetRequest(getRequest(contentUrl,title, page));
+						page.addTargetRequest(getRequest(contentUrl,title, time,page));
 						JSONArray jsonArray = amei.getJSONArray("multi_app_msg_item_list");
 						if (jsonArray != null && !jsonArray.isEmpty()) {
 							for (int i = 0; i < jsonArray.size(); i++) {
 								JSONObject subJson = jsonArray.getJSONObject(i);
 								String subUrl = subJson.getString("content_url");
 								String subTitle = subJson.get("title").toString();
-								page.addTargetRequest(getRequest(subUrl, subTitle, page));
+								page.addTargetRequest(getRequest(subUrl, subTitle, time, page));
 							} 
 						}
 					}
 				}
 				
-				
-				/*
-				 * 取全列表
-				 * for (int j = 0; j < list.size(); j++) {
-					JSONObject obj = list.getJSONObject(j);
-					JSONObject amei = obj.getJSONObject("app_msg_ext_info");
-					String contentUrl = amei.get("content_url").toString();
-					String title = amei.get("title").toString();
-					page.addTargetRequest(getRequest(contentUrl,title, page));
-					JSONArray jsonArray = amei.getJSONArray("multi_app_msg_item_list");
-					if (jsonArray != null && !jsonArray.isEmpty()) {
-						for (int i = 0; i < jsonArray.size(); i++) {
-							JSONObject subJson = jsonArray.getJSONObject(i);
-							String subUrl = subJson.getString("content_url");
-							String subTitle = subJson.get("title").toString();
-							page.addTargetRequest(getRequest(subUrl, subTitle, page));
-						} 
+			}else{
+				log.info("WeixinListPageProcess---" + page.getRequest().getSourceid() + "   " + page.getRawText());
+				 try {
+						HttpClientFactory.runGetMethod("http://localhost:8079/handleTaskError/" + page.getRequest().getSourceid());
+						log.info("Spider handleTaskError :" + page.getRequest().getSourceid());
+					} catch (HttpException e1) {
+						log.error("Spider handleTaskError\n{}",e1);
 					}
-				}*/
 			}
 		} catch (Exception e) {
 			String msg = "weixinListPageProcess process  解析失败    url="
 					+ page.getRequest().getUrl() + "  ,页面内容  = "
 					+ page.getRawText();
+			log.info("WeixinListPageProcess---" + page.getRequest().getSourceid() + "   " + page.getRawText());
+			 try {
+					HttpClientFactory.runGetMethod("http://localhost:8079/handleTaskError/" + page.getRequest().getSourceid());
+					log.info("Spider handleTaskError :" + page.getRequest().getSourceid());
+				} catch (HttpException e1) {
+					log.error("Spider handleTaskError\n{}",e1);
+				}
 			log.error(msg, e);
 		}
 	}
 
-	public Request getRequest(String url,String title, Page page) {
+	public Request getRequest(String url,String title, String time, Page page) {
 		Request request = new Request();
 		if (url != null && !"".equals(url)) {
 			String contentUrl = url.replace("amp;", "").replace("\\", "");
@@ -101,6 +100,7 @@ public class WeixinListPageProcess extends AbstractProcess {
 			extras.put("pageName", Constant.WEIXIN_CONTENT);
 			extras.put("taskName", Constant.WEIXIN_CONTENT);
 			extras.put(Constant.REQUEST_HEADER_REFERER, page.getUrl().toString());
+			extras.put("time", time);
 			request.setExtras(extras);
 			request.setWhether_proxy(false);
 			request.setUrl(contentUrl.replace("&amp;", "&"));

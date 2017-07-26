@@ -174,12 +174,13 @@ public class Request implements Serializable {
 	}
 
 	@Override
-    public String toString() {
-        return "Request{" +
-                "url='" + url + '\'' +
-                ", method='" + method + '\'' +
-                ", extras=" + extras +
-                ", priority=" + priority +
-                '}';
-    }
+	public String toString() {
+		return "Request [url=" + url + ", method=" + method + ", extras=" + extras + ", priority=" + priority
+				+ ", sourceid=" + sourceid + ", cookie=" + cookie + ", appid=" + appid + ", title=" + title
+				+ ", update_time=" + update_time + ", whether_deposited=" + whether_deposited + ", whether_proxy="
+				+ whether_proxy + "]";
+	}
+	
+	
+
 }
